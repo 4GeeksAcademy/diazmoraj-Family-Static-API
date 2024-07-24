@@ -33,26 +33,37 @@ def handle_hello():
     response_body = members
     return jsonify(response_body), 200
 
-@app.route("/members", methods=['POST'])
+@app.route('/member/<int:member_id>', methods=['GET'])
+def get_single_member(member_id):
+    get_member = jackson_family.get_member(member_id)
+    if not get_member:
+        # return jsonify(member), 200
+        return jsonify({"msg": "Member not found"}), 404
+    else:
+        return jsonify(get_member), 200
+        # return jsonify({"error": "Member not found"}), 404
+
+@app.route('/member', methods=['POST'])
 def new_member():
     body = request.get_json(silent=True)
     if body is None:
         return jsonify({"msg": "Debes enviar informacion en el body"}), 400
-    new_member_data = {
-        "id": jackson_family._generateId(),
-        "first_name": body["first_name"],
-        "last_name": jackson_family.last_name,
-        "age": body["age"],
-        "lucky_numbers": body["lucky_numbers"]
-    }
+    new_member_data = request.json
+    # {
+    #     "id": jackson_family._generateId(),
+    #     "first_name": body["first_name"],
+    #     "last_name": jackson_family.last_name,
+    #     "age": body["age"],
+    #     "lucky_numbers": body["lucky_numbers"]
+    # }
     jackson_family.add_member(new_member_data)
-    return jsonify({"msg": "New member added"}), 201
+    return jsonify({"done": "New member added"}), 200
 
 @app.route('/member/<int:member_id>', methods=['DELETE'])
 def delete_member(member_id):
     del_member = jackson_family.delete_member(member_id)
     if del_member:
-        return jsonify({"msg": True}), 200
+        return jsonify({"done": del_member}), 200
     else:
         return jsonify({"error": "Member ID not found"}), 404
 
